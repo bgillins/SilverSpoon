@@ -1,3 +1,4 @@
+import time
 from rest_framework import viewsets, permissions
 from .models import CustomUser, Badge, DietaryRestriction, Cuisine
 from .serializers import (
@@ -16,6 +17,10 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny 
 from rest_framework.throttling import AnonRateThrottle
+from rest_framework.throttling import SimpleRateThrottle
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -65,12 +70,42 @@ class CuisineViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-class PasswordResetThrottle(AnonRateThrottle):
+class PasswordResetThrottle(SimpleRateThrottle):
     scope = 'password_reset'
 
+    def get_cache_key(self, request, view):
+        return f"throttle_password_reset_{self.get_ident(request)}"
+
+    def allow_request(self, request, view):
+        if self.rate is None:
+            return True
+
+        self.key = self.get_cache_key(request, view)
+        if self.key is None:
+            return True
+
+        self.history = self.cache.get(self.key, [])
+        self.now = self.timer()
+
+        while self.history and self.history[-1] <= self.now - self.duration:
+            self.history.pop()
+
+        if len(self.history) >= self.num_requests:
+            return self.throttle_failure()
+
+        return self.throttle_success()
+
+    def throttle_success(self):
+        self.history.insert(0, self.now)
+        self.cache.set(self.key, self.history, self.duration)
+        return True
+
+    def throttle_failure(self):
+        return False
+
 class PasswordResetView(APIView):
-    throttle_classes = [PasswordResetThrottle]
     permission_classes = [AllowAny]
+    throttle_classes = [PasswordResetThrottle]
 
     def post(self, request):
         serializer = PasswordResetSerializer(data=request.data)

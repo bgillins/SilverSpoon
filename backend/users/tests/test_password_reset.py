@@ -41,3 +41,13 @@ class PasswordResetTest(TestCase):
 
         # Check if no email was sent
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_password_reset_rate_limiting(self):
+        # Send 3 valid password reset requests
+        for i in range(3):
+            response = self.client.post(self.url, {'email': 'brandongillins@gmail.com'})
+            self.assertEqual(response.status_code, status.HTTP_200_OK, f"Failed on request {i+1}")
+        
+        # 4th request should be throttled
+        response = self.client.post(self.url, {'email': 'brandongillins@gmail.com'})
+        self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS, "Failed on request 4")
