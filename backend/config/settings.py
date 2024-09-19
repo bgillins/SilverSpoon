@@ -146,4 +146,11 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'exp://192.168.68.70:19000'
+]
+
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    '192.168.68.70',  # Replace with your computer's IP
 ]

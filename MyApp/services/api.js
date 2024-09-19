@@ -1,20 +1,27 @@
+// services/api.js
+
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Replace '192.168.1.100' with your actual computer's IP address
+const API_BASE_URL = 'http://192.168.68.70:8000/api/';
 
 const api = axios.create({
-  baseURL: 'http://192.168.1.100:8000', // Ensure this is your backend's IP and protocol
-  // Add other configurations if needed
+  baseURL: API_BASE_URL,
 });
 
-export const testConnection = async () => {
-  try {
-    const response = await api.get('/health'); // Ensure you have a `/health` endpoint
-    return response.status === 200;
-  } catch (error) {
-    console.error('Health check failed:', error);
-    return false;
+// Add a request interceptor to include the token in headers
+api.interceptors.request.use(
+  async (config) => {
+    const token = await AsyncStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-};
+);
 
 export default api;
-
-console.log('API Initialized:', api);
