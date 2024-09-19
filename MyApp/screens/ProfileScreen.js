@@ -1,27 +1,24 @@
 // screens/ProfileScreen.js
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, Button, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, Button, Alert, TouchableOpacity } from 'react-native';
 import api from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = ({ navigation }) => {
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await api.get('users/');
-        // Assuming the API returns a list of users and you want the first one
-        if (response.data.length > 0) {
-          setUser(response.data[0]);
-        }
-      } catch (error) {
-        console.error(error);
-        Alert.alert('Error', 'Failed to fetch user data.');
-      }
-    };
+  const fetchUser = async () => {
+    try {
+      const response = await api.get('me/');
+      setUser(response.data);
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Failed to fetch user data.');
+    }
+  };
 
+  useEffect(() => {
     fetchUser();
   }, []);
 
@@ -35,6 +32,10 @@ const ProfileScreen = ({ navigation }) => {
       console.error(error);
       Alert.alert('Error', 'Failed to log out.');
     }
+  };
+
+  const handleEdit = () => {
+    navigation.navigate('EditProfile', { user, fetchUser });
   };
 
   if (!user) {
@@ -80,6 +81,7 @@ const ProfileScreen = ({ navigation }) => {
       <Text>{JSON.stringify(user.preferences)}</Text>
       <Text style={styles.sectionTitle}>Consent to Ads:</Text>
       <Text>{user.consent_to_ads ? 'Yes' : 'No'}</Text>
+      <Button title="Edit Profile" onPress={handleEdit} />
       <Button title="Logout" onPress={handleLogout} />
     </ScrollView>
   );

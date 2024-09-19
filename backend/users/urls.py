@@ -6,6 +6,7 @@ from .views import (
     DietaryRestrictionViewSet,
     CuisineViewSet,
     CustomTokenObtainPairView,
+    PasswordResetView,
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -17,6 +18,8 @@ router.register(r'cuisines', CuisineViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('me/', CustomUserViewSet.as_view({'get': 'me'}), name='user_me'),
     path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('password-reset/', PasswordResetView.as_view(), name='password_reset'),
 ]

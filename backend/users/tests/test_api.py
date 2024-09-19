@@ -30,3 +30,5 @@ headers = {'Authorization': f'Bearer {access_token}'}
 user_detail_url = f'{BASE_URL}/api/users/'
 response = requests.get(user_detail_url, headers=headers)
 print('User Detail Response:', response.status_code, response.json())
+
+

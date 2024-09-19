@@ -3,11 +3,15 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Replace '192.168.1.100' with your actual computer's IP address
-const API_BASE_URL = 'http://192.168.68.70:8000/api/';
+// // Replace '192.168.1.100' with your actual computer's IP address
+// const API_BASE_URL = 'http://192.168.68.70:8000/api/';
+
+// const api = axios.create({
+//   baseURL: API_BASE_URL,
+// });
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: 'http://192.168.68.70:8000/api/',
 });
 
 // Add a request interceptor to include the token in headers
