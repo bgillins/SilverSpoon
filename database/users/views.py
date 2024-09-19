@@ -25,3 +25,13 @@ class RegisterView(viewsets.ViewSet):
             serializer.save()
             return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginView(viewsets.ViewSet):
+    permission_classes = [permissions.AllowAny]
+
+    def create(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            login(request, user)

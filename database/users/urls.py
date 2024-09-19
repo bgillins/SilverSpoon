@@ -1,11 +1,10 @@
 from rest_framework.routers import DefaultRouter
-from .views import CustomUserViewSet, UserFollowViewSet, RegisterView
+from .views import CustomUserViewSet, UserFollowViewSet, RegisterView, LoginView
 from django.urls import path
 
 router = DefaultRouter()
 router.register(r'users', CustomUserViewSet)
-router.register(r'follows', UserFollowViewSet)
 
 urlpatterns = [
-    path('register/', RegisterView.as_view({'post': 'create'}), name='register'),
+    path('login/', LoginView.as_view(), name='login'),
 ] + router.urls
