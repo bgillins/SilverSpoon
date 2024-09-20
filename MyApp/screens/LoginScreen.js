@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, Alert, ImageBackground, KeyboardAvoi
 import api from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import backgroundImage from '../assets/background.png';
+import NetInfo from "@react-native-community/netinfo";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -41,11 +42,16 @@ const LoginScreen = ({ navigation }) => {
     }
     setIsLoading(true);
     try {
+      const netInfo = await NetInfo.fetch();
+      if (!netInfo.isConnected) {
+        Alert.alert('Error', 'No internet connection. Please check your network and try again.');
+        return;
+      }
       const response = await api.post('password-reset/', { email });
       Alert.alert('Success', 'Password reset email sent. Please check your inbox.');
       setPassword(''); // Clear password field after reset request
     } catch (error) {
-      console.error(error);
+      console.error('Password reset error:', error.response?.data || error.message);
       Alert.alert('Error', 'Failed to send password reset email. Please try again.');
     } finally {
       setIsLoading(false);
@@ -84,8 +90,14 @@ const LoginScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.forgotPasswordButton} onPress={handleForgotPassword}>
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+          <TouchableOpacity 
+            style={styles.forgotPasswordButton} 
+            onPress={handleForgotPassword}
+            disabled={isLoading}
+          >
+            <Text style={styles.forgotPasswordText}>
+              {isLoading ? 'Sending...' : 'Forgot Password?'}
+            </Text>
           </TouchableOpacity>
           <Text style={styles.link} onPress={() => navigation.navigate('Register')}>
             Don't have an account? Register
@@ -118,12 +130,12 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 50,
-    borderColor: '#999', // Slightly darker border color
+    borderColor: '#ccc',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderWidth: 1,
     marginBottom: 15,
     paddingHorizontal: 10,
     borderRadius: 5,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark background for input fields
     color: '#fff', // White text for input
   },
   button: {
@@ -139,7 +151,7 @@ const styles = StyleSheet.create({
   },
   link: {
     marginTop: 15,
-    color: '#fff', // White color for the link text
+    color: '#ffffff',
     textAlign: 'center',
   },
   forgotPasswordButton: {

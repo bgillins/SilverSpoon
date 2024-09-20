@@ -209,3 +209,7 @@ LOGGING = {
         'level': 'DEBUG',
     },
 }
+
+if 'test' in sys.argv:
+    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+    EMAIL_FILE_PATH = '/tmp/app-messages'  # This is where the email will be stored during tests
