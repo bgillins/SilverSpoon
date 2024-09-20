@@ -7,6 +7,7 @@ from .views import (
     CuisineViewSet,
     CustomTokenObtainPairView,
     PasswordResetView,
+    PasswordResetConfirmView,
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -22,4 +23,5 @@ urlpatterns = [
     path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('password-reset/', PasswordResetView.as_view(), name='password_reset'),
+    path('password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
 ]

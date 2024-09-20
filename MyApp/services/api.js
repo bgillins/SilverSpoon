@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // });
 
 const api = axios.create({
-  baseURL: 'http://192.168.68.70:8000/api/',
+  baseURL: 'http://192.168.68.70:8000/api/', // Ensure this matches your backend URL
   timeout: 10000, // 10 seconds timeout
 });
 
@@ -24,9 +24,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Add a response interceptor to handle errors

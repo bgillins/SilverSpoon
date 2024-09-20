@@ -83,7 +83,7 @@ class PasswordResetSerializer(serializers.Serializer):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         
         # Create password reset link
-        reset_link = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}/"
+        reset_link = f"myapp://reset-password/{uid}/{token}/"
         
         # Send email
         subject = "Password Reset Request"
@@ -94,3 +94,36 @@ class PasswordResetSerializer(serializers.Serializer):
         send_mail(subject, message, from_email, recipient_list)
         
         return uid, token  # Return these for testing purposes
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from rest_framework import serializers
+
+User = get_user_model()
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate(self, attrs):
+        try:
+            uid = attrs.get('uid')
+            token = attrs.get('token')
+            user_id = urlsafe_base64_decode(uid).decode()
+            user = User.objects.get(pk=user_id)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            raise serializers.ValidationError('Invalid UID or token.')
+
+        if not default_token_generator.check_token(user, token):
+            raise serializers.ValidationError('Invalid or expired token.')
+
+        attrs['user'] = user
+        return attrs
+
+    def save(self, **kwargs):
+        user = self.validated_data['user']
+        new_password = self.validated_data['new_password']
+        user.set_password(new_password)
+        user.save()
+        return user

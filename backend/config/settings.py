@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'django_rest_passwordreset',
 
     # Your apps
     'users',
@@ -160,7 +161,9 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
-    'exp://192.168.68.70:19000'
+    'exp://192.168.68.70:19000',
+    "http://192.168.68.70:8000"
+    # Production URL
 ]
 
 ALLOWED_HOSTS = [
@@ -169,7 +172,7 @@ ALLOWED_HOSTS = [
     '192.168.68.70',  # Replace with your computer's IP
 ]
 
-# ... (previous code remains unchanged)
+# ... (rest of the code remains unchanged)
 
 # Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -213,3 +216,8 @@ LOGGING = {
 if 'test' in sys.argv:
     EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
     EMAIL_FILE_PATH = '/tmp/app-messages'  # This is where the email will be stored during tests
+# Password reset settings
+PASSWORD_RESET_CONFIRM_URL = 'myapp://reset-password/{uid}/{token}/'
+PASSWORD_RESET_FROM_EMAIL = 'Your App <noreply@example.com>'
+PASSWORD_RESET_EMAIL_TEMPLATE_NAME = 'password_reset_email.html'
+

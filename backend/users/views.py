@@ -9,6 +9,7 @@ from .serializers import (
     CuisineSerializer,
     CustomTokenObtainPairSerializer,
     PasswordResetSerializer,
+    PasswordResetConfirmSerializer,
 )
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import action
@@ -112,4 +113,16 @@ class PasswordResetView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response({"detail": "Password reset email sent."}, status=status.HTTP_200_OK)
+            # return Response({"detail": "Password reset email sent.", "reset_link": result['reset_link']}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [PasswordResetThrottle]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"detail": "Password has been reset successfully."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
