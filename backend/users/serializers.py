@@ -67,6 +67,7 @@ class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
     def validate_email(self, value):
+        value = value.lower()
         try:
             CustomUser.objects.get(email=value)
         except CustomUser.DoesNotExist:
@@ -74,7 +75,7 @@ class PasswordResetSerializer(serializers.Serializer):
         return value
 
     def save(self):
-        email = self.validated_data['email']
+        email = self.validated_data['email'].lower()
         user = CustomUser.objects.get(email=email)
         
         # Generate password reset token

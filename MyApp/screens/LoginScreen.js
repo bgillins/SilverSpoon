@@ -1,21 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, ImageBackground, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Alert, ImageBackground, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import api from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import backgroundImage from '../assets/background.png';
-import NetInfo from "@react-native-community/netinfo";
+import CustomInput from '../components/CustomInput';
+import CustomButton from '../components/CustomButton';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
     try {
-      const response = await api.post('token/', {
-        email,
-        password,
-      });
+      const response = await api.post('token/', { email, password });
       const { access, refresh } = response.data;
       await AsyncStorage.setItem('access_token', access);
       await AsyncStorage.setItem('refresh_token', refresh);
@@ -26,82 +23,34 @@ const LoginScreen = ({ navigation }) => {
       Alert.alert('Error', 'Login failed. Please check your credentials.');
     }
   };
-  const validateEmail = (email) => {
-    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return re.test(String(email).toLowerCase());
-  };
-
-  const handleForgotPassword = async () => {
-    if (!email) {
-      Alert.alert('Error', 'Please enter your email address.');
-      return;
-    }
-    if (!validateEmail(email)) {
-      Alert.alert('Error', 'Please enter a valid email address.');
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const netInfo = await NetInfo.fetch();
-      if (!netInfo.isConnected) {
-        Alert.alert('Error', 'No internet connection. Please check your network and try again.');
-        return;
-      }
-      const response = await api.post('password-reset/', { email });
-      Alert.alert('Success', 'Password reset email sent. Please check your inbox.');
-      setPassword(''); // Clear password field after reset request
-    } catch (error) {
-      console.error('Password reset error:', error.response?.data || error.message);
-      Alert.alert('Error', 'Failed to send password reset email. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
 
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ImageBackground
-        source={backgroundImage}
-        style={styles.background}
-      >
+      <ImageBackground source={backgroundImage} style={styles.background}>
         <View style={styles.container}>
           <Text style={styles.title}>Login</Text>
-          <TextInput
-            style={styles.input}
+          <CustomInput
             placeholder="Email"
-            placeholderTextColor="#ccc"
             value={email}
             onChangeText={setEmail}
-            autoCapitalize="none"
             keyboardType="email-address"
           />
-          <TextInput
-            style={styles.input}
+          <CustomInput
             placeholder="Password"
-            placeholderTextColor="#ccc"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
           />
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Login</Text>
+          <CustomButton title="Login" onPress={handleLogin} />
+          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+            <Text style={styles.link}>Forgot Password?</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.forgotPasswordButton} 
-            onPress={handleForgotPassword}
-            disabled={isLoading}
-          >
-            <Text style={styles.forgotPasswordText}>
-              {isLoading ? 'Sending...' : 'Forgot Password?'}
-            </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+            <Text style={styles.link}>Don't have an account? Register</Text>
           </TouchableOpacity>
-          <Text style={styles.link} onPress={() => navigation.navigate('Register')}>
-            Don't have an account? Register
-          </Text>
         </View>
       </ImageBackground>
     </KeyboardAvoidingView>
@@ -153,6 +102,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     color: '#ffffff',
     textAlign: 'center',
+    textDecorationLine: 'underline',
   },
   forgotPasswordButton: {
     marginTop: 10,

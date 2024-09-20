@@ -53,6 +53,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
+    def save(self, *args, **kwargs):
+        self.email = self.email.lower()
+        super().save(*args, **kwargs)
+
 class Badge(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(blank=True)
